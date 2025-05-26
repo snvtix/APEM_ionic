@@ -8,7 +8,7 @@ Instrykcja wersja przegladarkowa:
 - ionic serve
 
 Instrukcja portowanie na androida:
-- instalacja android studio
+- instalacja android studio + dodanie SDK
 - ionic build
 - ionic cap copy
 - ionic cap add android
