@@ -1,0 +1,35 @@
+/* For information on how to create your own theme, please see:
+http://ionicframework.com/docs/theming/ */
+
+/* theme/variables.css */
+
+/* Kolory */
+:root {
+  --color-primary-bordo: #800020; /* bordo */
+  --color-primary-bordo-hover: #a00030; /* trochę jaśniejsze bordo na hover */
+  --color-disabled-gray: #cccccc;
+  --color-header-bg: #442942;
+  --color-header-text: #ffffff;
+  --color-side-panel-bg: #f5f5f5;
+  --color-side-panel-border: #ddd;
+  --color-reset-button-bg: #4a90e2;
+  --color-reset-button-hover: #357ABD;
+  --color-camera-placeholder-bg: #eee;
+  --color-camera-placeholder-text: #666;
+  --color-border: #ddd;
+
+  /* Rozmiary */
+  --size-control-button-padding: 0.5rem 1rem;
+  --size-font-normal: 1rem;
+  --size-border-radius: 4px;
+  --size-video-max-width: 640px;
+  --size-video-height: 480px;
+  --size-side-panel-padding: 1rem;
+  --size-gap-controls: 1rem;
+
+  /* Font */
+  --font-main: Arial, sans-serif;
+
+  /* Cienie */
+  --shadow-header-box: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
