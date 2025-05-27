@@ -1,118 +1,126 @@
 .tab1-content {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --padding-top: 16px;
-  --padding-bottom: 16px;
+  --padding: 16px;
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  height: 100%;
-  overflow-y: auto;
-  padding: var(--padding-top) var(--padding-end) var(--padding-bottom) var(--padding-start);
-  font-family: var(--font-main);
-  background-color: var(--color-side-panel-bg);
+  height: 100vh;
+  padding: var(--padding);
+  background-color: #f5f7fa; /* Lighter background */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.camera-container {
+/* Header */
+.app-header {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #4361ee;
+}
+
+/* Larger camera preview */
+.media-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-bottom: 12px;
+  min-height: 0;
+}
+
+.video-feed, .captured-image {
   width: 100%;
-  max-width: var(--size-video-max-width);
+  height: 50vh; /* Larger camera view */
+  max-height: 50vh;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  object-fit: cover; /* Fill the container */
+  margin: 0 auto;
+}
+
+/* Centered buttons */
+.button-row {
+  display: flex;
+  justify-content: center; /* Center buttons */
+  gap: 16px; /* More space between buttons */
+  margin: 16px 0;
+}
+
+.button-row button {
+  width: 120px; /* Fixed width for buttons */
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 1rem;
   text-align: center;
 }
 
-.video-feed {
-  width: 100%;
-  height: var(--size-video-height);
-  border-radius: var(--size-border-radius);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  background-color: var(--color-camera-placeholder-bg);
-  border: 2px solid var(--color-border);
-  object-fit: cover;
-  transform: scaleX(-1); /* lustrzane odbicie */
-  margin-bottom: 1rem;
+/* Save button */
+.button-save-photo {
+  background-color: #4361ee;
+  color: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
 }
 
-.captured-image {
-  width: 100%;
-  height: auto;
-  border-radius: var(--size-border-radius);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--color-border);
-  margin-top: 0.5rem;
-  object-fit: contain;
-  transform: none !important;
+/* Delete button */
+.button-delete-photo {
+  background-color: #4361ee;
+  color: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
 }
 
-.button-take-photo,
-.button-save-photo,
-.button-delete-photo,
-.reset-button {
-  margin-top: 20px;
-  width: 48%;
-  padding: var(--size-control-button-padding);
-  background-color: transparent;
-  color: var(--color-primary-bordo);
-  font-weight: bold;
-  border: 2px solid var(--color-primary-bordo);
-  border-radius: var(--size-border-radius);
-  cursor: pointer;
-  font-size: var(--size-font-normal);
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.button-take-photo:hover,
-.button-save-photo:hover,
-.button-delete-photo:hover,
-.reset-button:hover {
-  background-color: var(--color-primary-bordo);
-  color: var(--color-header-text);
-}
-
-.button-take-photo:disabled,
-.button-save-photo:disabled,
-.button-delete-photo:disabled,
-.reset-button:disabled {
-  background-color: var(--color-disabled-gray);
-  color: #666;
-  border-color: var(--color-disabled-gray);
-  cursor: not-allowed;
-}
-
-.button-row {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-
+/* Enhanced sliders */
 .sliders-container {
-  margin-top: 20px;
-  text-align: left;
-  max-width: var(--size-video-max-width);
-  width: 100%;
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--size-border-radius);
-  padding: var(--size-side-panel-padding);
-  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .slider-control {
+  display: flex;
+  align-items: center;
   margin-bottom: 12px;
 }
 
 .slider-control label {
-  display: block;
-  margin-bottom: 4px;
-  font-weight: 600;
-  color: var(--color-primary-bordo);
+  width: 100px;
+  font-size: 0.95rem;
+  color: #495057;
+  font-weight: 500;
 }
 
 .slider-control input[type="range"] {
-  width: 100%;
+  flex-grow: 1;
+  margin: 0 12px;
+  height: 8px; /* Thicker slider track */
 }
 
+.slider-control input[type="range"]::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+}
+
+.slider-control span {
+  width: 50px;
+  text-align: right;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* Reset button */
 .reset-button {
   width: 100%;
+  padding: 12px;
   margin-top: 8px;
+  background-color: #ffffff;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
 }
-

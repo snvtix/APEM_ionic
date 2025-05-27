@@ -138,96 +138,100 @@ const Tab1: React.FC = () => {
     }
   }, [stream]);
 
+  
+
+
   return (
     <IonPage>
       <IonContent fullscreen className="tab1-content">
-        <div className="camera-container">
+        <div className="app-header">Photo Editor</div>
+        
+        <div className="media-container">
           {!capturedImage ? (
-            <>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                className="video-feed"
-                style={{ transform: 'scaleX(-1)' }} // <-- Odbicie lustrzane w podglądzie
-              />
-              <IonButton onClick={takePhoto} className="button-take-photo">
-                Take Photo
-              </IonButton>
-            </>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="video-feed"
+            />
           ) : (
-            <>
-              <img
-                ref={editedImageRef}
-                src={capturedImage}
-                alt="Captured"
-                className="captured-image"
-              />
-              <div className="button-row">
-                <IonButton onClick={savePhoto} className="button-save-photo">
-                  Save Photo
-                </IonButton>
-                <IonButton onClick={deletePhoto} className="button-delete-photo">
-                  Delete Photo
-                </IonButton>
-              </div>
-
-              <div className="sliders-container">
-                <div className="slider-control">
-                  <label>Brightness: {imageSettings.brightness}%</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="200"
-                    value={imageSettings.brightness}
-                    onChange={e => handleSettingChange('brightness', e.target.value)}
-                  />
-                </div>
-
-                <div className="slider-control">
-                  <label>Contrast: {imageSettings.contrast}%</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="200"
-                    value={imageSettings.contrast}
-                    onChange={e => handleSettingChange('contrast', e.target.value)}
-                  />
-                </div>
-
-                <div className="slider-control">
-                  <label>Saturation: {imageSettings.saturation}%</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="200"
-                    value={imageSettings.saturation}
-                    onChange={e => handleSettingChange('saturation', e.target.value)}
-                  />
-                </div>
-
-                <div className="slider-control">
-                  <label>Sepia: {imageSettings.sepia}%</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={imageSettings.sepia}
-                    onChange={e => handleSettingChange('sepia', e.target.value)}
-                  />
-                </div>
-
-                <IonButton onClick={resetSettings} className="reset-button">
-                  Reset Settings
-                </IonButton>
-              </div>
-            </>
+            <img
+              ref={editedImageRef}
+              src={capturedImage}
+              alt="Captured"
+              className="captured-image"
+            />
           )}
-          <canvas ref={canvasRef} style={{ display: 'none' }} />
+        </div>
+
+        <div className="button-row">
+          <IonButton onClick={savePhoto} className="button-save-photo">
+            SAVE
+          </IonButton>
+          <IonButton onClick={deletePhoto} className="button-delete-photo">
+            DELETE
+          </IonButton>
+        </div>
+
+        <div className="sliders-container">
+          <div className="slider-control">
+            <label>Brightness</label>
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value={imageSettings.brightness}
+              onChange={e => handleSettingChange('brightness', e.target.value)}
+            />
+            <span>{imageSettings.brightness}%</span>
+          </div>
+
+          <div className="slider-control">
+            <label>Contrast</label>
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value={imageSettings.contrast}
+              onChange={e => handleSettingChange('contrast', e.target.value)}
+            />
+            <span>{imageSettings.contrast}%</span>
+          </div>
+
+          <div className="slider-control">
+            <label>Saturation</label>
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value={imageSettings.saturation}
+              onChange={e => handleSettingChange('saturation', e.target.value)}
+            />
+            <span>{imageSettings.saturation}%</span>
+          </div>
+
+          <div className="slider-control">
+            <label>Sepia</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={imageSettings.sepia}
+              onChange={e => handleSettingChange('sepia', e.target.value)}
+            />
+            <span>{imageSettings.sepia}%</span>
+          </div>
+
+          <IonButton onClick={resetSettings} className="reset-button">
+            RESET SETTINGS
+          </IonButton>
         </div>
       </IonContent>
     </IonPage>
   );
+
+
+  
 };
 
 export default Tab1;
