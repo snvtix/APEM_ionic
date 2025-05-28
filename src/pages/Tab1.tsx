@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IonContent, IonPage, IonButton } from '@ionic/react';
 import './Tab1.css';
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'; // Dodano Encoding
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'; // Dodano CameraResultType, CameraSource
-import { Share } from '@capacitor/share'; // Share może być przydatne, ale nie jest kluczowe dla tego problemu
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'; // ZMIANA: import Camera
+import { Share } from '@capacitor/share';
 
 const Tab1: React.FC = () => {
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -21,19 +21,18 @@ const Tab1: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const editedImageRef = useRef<HTMLImageElement>(null);
-
+  
   const startCamera = async () => {
     try {
-      // Używamy Camera API z Capacitor zamiast navigator.mediaDevices.getUserMedia
-      // W Capacitor, Camera.getPhoto jest bardziej przystosowane do robienia zdjęć
-      // ale do podglądu wideo, navigator.mediaDevices.getUserMedia jest nadal standardem webowym.
-      // Jeśli chcesz używać Capacitor Camera do podglądu, wymagałoby to innej implementacji
-      // z użyciem 'CameraPreview' pluginu. Na potrzeby tego zadania, zostawiamy podgląd wideo
-      // przez navigator.mediaDevices.getUserMedia dla prostoty.
       const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
       setStream(mediaStream);
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
+        // ZMIANA: fallback na URL.createObjectURL
+        try {
+          videoRef.current.srcObject = mediaStream;
+        } catch (error) {
+          videoRef.current.src = URL.createObjectURL(mediaStream);
+        }
       }
     } catch (err) {
       console.error("Error accessing camera:", err);
@@ -53,19 +52,23 @@ const Tab1: React.FC = () => {
       const width = video.videoWidth || video.clientWidth;
       const height = video.videoHeight || video.clientHeight;
 
+      // ZMIANA: sprawdzenie czy kamera gotowa
+      if (width === 0 || height === 0) {
+        console.warn("Camera not ready yet. Try again.");
+        return;
+      }
+
       canvasRef.current.width = width;
       canvasRef.current.height = height;
 
       const ctx = canvasRef.current.getContext('2d');
       if (!ctx) return;
 
-      // Odbicie lustrzane poziome podczas rysowania na canvasie
       ctx.translate(width, 0);
       ctx.scale(-1, 1);
 
       ctx.drawImage(video, 0, 0, width, height);
 
-      // Przywróć transformację domyślną
       ctx.setTransform(1, 0, 0, 1, 0, 0);
 
       const imageDataUrl = canvasRef.current.toDataURL('image/png');
@@ -74,10 +77,10 @@ const Tab1: React.FC = () => {
     }
   };
 
-  const savePhoto = async () => { // Zmieniono na async
+  const savePhoto = async () => {
     if (capturedImage && canvasRef.current && editedImageRef.current) {
       const img = new Image();
-      img.onload = async () => { // Zmieniono na async
+      img.onload = async () => {
         const canvas = canvasRef.current!;
         canvas.width = img.width;
         canvas.height = img.height;
@@ -91,20 +94,19 @@ const Tab1: React.FC = () => {
         `;
         ctx.drawImage(img, 0, 0);
 
-        ctx.filter = 'none'; // Ważne: zresetuj filtr dla ctx po rysowaniu
+        ctx.filter = 'none';
 
         const imageDataUrlToSave = canvas.toDataURL('image/png');
 
-        // Zapisywanie pliku za pomocą Capacitor Filesystem
         try {
           const fileName = `photo_${new Date().getTime()}.png`;
-          const base64Data = imageDataUrlToSave.split(',')[1]; // Usuń "data:image/png;base64,"
+          const base64Data = imageDataUrlToSave.split(',')[1];
 
           await Filesystem.writeFile({
             path: fileName,
             data: base64Data,
-            directory: (Directory as any).Pictures, // Zapisz w katalogu zdjęć
-            recursive: true // Tworzy katalogi, jeśli nie istnieją
+            directory: (Directory as any).Pictures,
+            recursive: true
           });
           alert('Photo saved successfully!');
         } catch (error) {
@@ -149,13 +151,27 @@ const Tab1: React.FC = () => {
   }, [imageSettings, capturedImage]);
 
   useEffect(() => {
+    // ZMIANA: prosimy o uprawnienia do kamery
+    const requestPermissions = async () => {
+      try {
+        await Camera.requestPermissions();
+      } catch (err) {
+        console.error("Permission error", err);
+      }
+    };
+    requestPermissions();
     startCamera();
     return () => stopCamera();
   }, []);
 
   useEffect(() => {
     if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
+      // ZMIANA: ponowne przypisanie przy zmianie strumienia
+      try {
+        videoRef.current.srcObject = stream;
+      } catch (error) {
+        videoRef.current.src = URL.createObjectURL(stream as any);
+      }
     }
   }, [stream]);
 
@@ -163,7 +179,7 @@ const Tab1: React.FC = () => {
     <IonPage>
       <IonContent fullscreen className="tab1-content">
         <div className="app-header">Photo Editor</div>
-        
+
         <div className="media-container">
           {!capturedImage ? (
             <video
@@ -183,12 +199,12 @@ const Tab1: React.FC = () => {
         </div>
 
         <div className="button-row">
-          {!capturedImage && ( // Pokaż przycisk "TAKE PHOTO" tylko jeśli nie ma przechwyconego obrazu
-            <IonButton onClick={takePhoto} className="button-take-photo"> {/* Dodany przycisk */}
+          {!capturedImage && (
+            <IonButton onClick={takePhoto} className="button-take-photo">
               TAKE PHOTO
             </IonButton>
           )}
-          {capturedImage && ( // Pokaż przyciski SAVE i DELETE tylko jeśli jest przechwycony obraz
+          {capturedImage && (
             <>
               <IonButton onClick={savePhoto} className="button-save-photo">
                 SAVE
@@ -200,7 +216,7 @@ const Tab1: React.FC = () => {
           )}
         </div>
 
-        {capturedImage && ( // Pokaż suwaki tylko jeśli jest przechwycony obraz
+        {capturedImage && (
           <div className="sliders-container">
             <div className="slider-control">
               <label>Brightness</label>
@@ -255,6 +271,7 @@ const Tab1: React.FC = () => {
             </IonButton>
           </div>
         )}
+        <canvas ref={canvasRef} style={{ display: 'none' }} /> {/* ZMIANA: canvas w DOM */}
       </IonContent>
     </IonPage>
   );
