@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IonContent, IonPage, IonButton } from '@ionic/react';
 import './Tab1.css';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'; // Dodano Encoding
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'; // Dodano CameraResultType, CameraSource
+import { Share } from '@capacitor/share'; // Share może być przydatne, ale nie jest kluczowe dla tego problemu
 
 const Tab1: React.FC = () => {
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -21,6 +24,12 @@ const Tab1: React.FC = () => {
 
   const startCamera = async () => {
     try {
+      // Używamy Camera API z Capacitor zamiast navigator.mediaDevices.getUserMedia
+      // W Capacitor, Camera.getPhoto jest bardziej przystosowane do robienia zdjęć
+      // ale do podglądu wideo, navigator.mediaDevices.getUserMedia jest nadal standardem webowym.
+      // Jeśli chcesz używać Capacitor Camera do podglądu, wymagałoby to innej implementacji
+      // z użyciem 'CameraPreview' pluginu. Na potrzeby tego zadania, zostawiamy podgląd wideo
+      // przez navigator.mediaDevices.getUserMedia dla prostoty.
       const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
       setStream(mediaStream);
       if (videoRef.current) {
@@ -65,10 +74,10 @@ const Tab1: React.FC = () => {
     }
   };
 
-  const savePhoto = () => {
+  const savePhoto = async () => { // Zmieniono na async
     if (capturedImage && canvasRef.current && editedImageRef.current) {
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => { // Zmieniono na async
         const canvas = canvasRef.current!;
         canvas.width = img.width;
         canvas.height = img.height;
@@ -82,14 +91,26 @@ const Tab1: React.FC = () => {
         `;
         ctx.drawImage(img, 0, 0);
 
-        ctx.filter = 'none';
+        ctx.filter = 'none'; // Ważne: zresetuj filtr dla ctx po rysowaniu
 
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = 'photo.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const imageDataUrlToSave = canvas.toDataURL('image/png');
+
+        // Zapisywanie pliku za pomocą Capacitor Filesystem
+        try {
+          const fileName = `photo_${new Date().getTime()}.png`;
+          const base64Data = imageDataUrlToSave.split(',')[1]; // Usuń "data:image/png;base64,"
+
+          await Filesystem.writeFile({
+            path: fileName,
+            data: base64Data,
+            directory: (Directory as any).Pictures, // Zapisz w katalogu zdjęć
+            recursive: true // Tworzy katalogi, jeśli nie istnieją
+          });
+          alert('Photo saved successfully!');
+        } catch (error) {
+          console.error('Error saving photo:', error);
+          alert('Failed to save photo.');
+        }
       };
       img.src = capturedImage;
     }
@@ -138,9 +159,6 @@ const Tab1: React.FC = () => {
     }
   }, [stream]);
 
-  
-
-
   return (
     <IonPage>
       <IonContent fullscreen className="tab1-content">
@@ -165,73 +183,81 @@ const Tab1: React.FC = () => {
         </div>
 
         <div className="button-row">
-          <IonButton onClick={savePhoto} className="button-save-photo">
-            SAVE
-          </IonButton>
-          <IonButton onClick={deletePhoto} className="button-delete-photo">
-            DELETE
-          </IonButton>
+          {!capturedImage && ( // Pokaż przycisk "TAKE PHOTO" tylko jeśli nie ma przechwyconego obrazu
+            <IonButton onClick={takePhoto} className="button-take-photo"> {/* Dodany przycisk */}
+              TAKE PHOTO
+            </IonButton>
+          )}
+          {capturedImage && ( // Pokaż przyciski SAVE i DELETE tylko jeśli jest przechwycony obraz
+            <>
+              <IonButton onClick={savePhoto} className="button-save-photo">
+                SAVE
+              </IonButton>
+              <IonButton onClick={deletePhoto} className="button-delete-photo">
+                DELETE
+              </IonButton>
+            </>
+          )}
         </div>
 
-        <div className="sliders-container">
-          <div className="slider-control">
-            <label>Brightness</label>
-            <input
-              type="range"
-              min="0"
-              max="200"
-              value={imageSettings.brightness}
-              onChange={e => handleSettingChange('brightness', e.target.value)}
-            />
-            <span>{imageSettings.brightness}%</span>
-          </div>
+        {capturedImage && ( // Pokaż suwaki tylko jeśli jest przechwycony obraz
+          <div className="sliders-container">
+            <div className="slider-control">
+              <label>Brightness</label>
+              <input
+                type="range"
+                min="0"
+                max="200"
+                value={imageSettings.brightness}
+                onChange={e => handleSettingChange('brightness', e.target.value)}
+              />
+              <span>{imageSettings.brightness}%</span>
+            </div>
 
-          <div className="slider-control">
-            <label>Contrast</label>
-            <input
-              type="range"
-              min="0"
-              max="200"
-              value={imageSettings.contrast}
-              onChange={e => handleSettingChange('contrast', e.target.value)}
-            />
-            <span>{imageSettings.contrast}%</span>
-          </div>
+            <div className="slider-control">
+              <label>Contrast</label>
+              <input
+                type="range"
+                min="0"
+                max="200"
+                value={imageSettings.contrast}
+                onChange={e => handleSettingChange('contrast', e.target.value)}
+              />
+              <span>{imageSettings.contrast}%</span>
+            </div>
 
-          <div className="slider-control">
-            <label>Saturation</label>
-            <input
-              type="range"
-              min="0"
-              max="200"
-              value={imageSettings.saturation}
-              onChange={e => handleSettingChange('saturation', e.target.value)}
-            />
-            <span>{imageSettings.saturation}%</span>
-          </div>
+            <div className="slider-control">
+              <label>Saturation</label>
+              <input
+                type="range"
+                min="0"
+                max="200"
+                value={imageSettings.saturation}
+                onChange={e => handleSettingChange('saturation', e.target.value)}
+              />
+              <span>{imageSettings.saturation}%</span>
+            </div>
 
-          <div className="slider-control">
-            <label>Sepia</label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={imageSettings.sepia}
-              onChange={e => handleSettingChange('sepia', e.target.value)}
-            />
-            <span>{imageSettings.sepia}%</span>
-          </div>
+            <div className="slider-control">
+              <label>Sepia</label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={imageSettings.sepia}
+                onChange={e => handleSettingChange('sepia', e.target.value)}
+              />
+              <span>{imageSettings.sepia}%</span>
+            </div>
 
-          <IonButton onClick={resetSettings} className="reset-button">
-            RESET SETTINGS
-          </IonButton>
-        </div>
+            <IonButton onClick={resetSettings} className="reset-button">
+              RESET SETTINGS
+            </IonButton>
+          </div>
+        )}
       </IonContent>
     </IonPage>
   );
-
-
-  
 };
 
 export default Tab1;

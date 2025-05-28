@@ -73,6 +73,16 @@
   box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
 }
 
+/* Nowy styl dla przycisku "TAKE PHOTO" */
+/* ZMIANA START */
+.button-take-photo {
+  background-color: #28a745; /* Zielony kolor dla przycisku akcji */
+  color: white;
+  border: none;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+/* ZMIANA KONIEC */
+
 /* Enhanced sliders */
 .sliders-container {
   background: #ffffff;
