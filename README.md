@@ -12,4 +12,5 @@ Instrukcja portowanie na androida:
 - ionic build
 - ionic cap copy
 - ionic cap add android
+- ionic cap sync android
 - ionic cap open android
